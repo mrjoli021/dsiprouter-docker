@@ -1,0 +1,29 @@
+FROM kamailio/kamailio:5.2.8-stretch
+
+# To use MYSQL as DB 
+RUN sed -i 's/# DBENGINE=MYSQL/DBENGINE=MYSQL/g' /etc/kamailio/kamctlrc 
+ 
+# DB access
+RUN sed -i 's/# DBRWUSER="kamailio"/DBRWUSER="kamailio"/g' /etc/kamailio/kamctlrc 
+RUN sed -i 's/# DBRWPW="kamailiorw"/DBRWPW="kamailiorw"/g' /etc/kamailio/kamctlrc 
+RUN sed -i 's/# DBROUSER="kamailioro"/DBROUSER="kamailioro"/g' /etc/kamailio/kamctlrc 
+RUN sed -i 's/# DBROPW="kamailioro"/DBROPW="kamailioro"/g' /etc/kamailio/kamctlrc 
+
+RUN sed -i 's/#CHARSET="latin1"/CHARSET="utf8"/g' /etc/kamailio/kamctlrc 
+RUN sed -i 's/# DBPORT="3306"/DBPORT="3306"/g' /etc/kamailio/kamctlrc 
+
+#SET EXTRA TABLES
+RUN sed -i 's/# INSTALL_EXTRA_TABLES=ask/INSTALL_EXTRA_TABLES=yes/g' /etc/kamailio/kamctlrc 
+RUN sed -i 's/# INSTALL_DBUID_TABLES=ask/INSTALL_DBUID_TABLES=yes/g' /etc/kamailio/kamctlrc 
+RUN sed -i 's/# INSTALL_PRESENCE_TABLES=ask/INSTALL_PRESENCE_TABLES=yes/g' /etc/kamailio/kamctlrc 
+ 
+# DB DOCKER HOST
+RUN sed -i 's/# DBHOST=localhost/DBHOST=mariadb/g' /etc/kamailio/kamctlrc 
+ 
+# To enable usage of MySQL 
+RUN sed -i -e '1i#!define WITH_MYSQL\' /etc/kamailio/kamailio.cfg 
+RUN sed -i -e '2i#!define WITH_AUTH\' /etc/kamailio/kamailio.cfg 
+RUN sed -i -e '3i#!define WITH_USRLOCDB\' /etc/kamailio/kamailio.cfg 
+
+
+ENTRYPOINT ["kamailio","-DD","-E"]

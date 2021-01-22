@@ -1,0 +1,48 @@
+---
+version: "3"
+services:
+  kamailio:
+    image: my-kamailio:5.3.8-011621
+    #image: kamailio/kamailio:5.2.8-stretch
+    restart: "no"
+    container_name: kamailio
+    #environment:
+    volumes:
+      - kamailio_Data:/etc/kamailio
+    ports:
+      - 5060:5060
+      - 5061:5061
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - mariadb_Data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    #enviroment:
+    volumes:
+      - nginx_Data:/etc/nginx/sites-available
+      #- cert_Conf:/etc/letsencrypt
+      #- cert_Data:/var/www/certbot
+    ports:
+      - 80:80
+      - 443:443
+      - 5000:5000
+        #command: "curl -L https://raw.githubusercontent.com/wmnnd/nginx-certbot/master/init-letsencrypt.sh > init-letsencrypt.sh"
+        #command: "chmod +x init-letsencrypt.sh && ./init-letsencrypt.sh"
+        #command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+volumes:
+  kamailio_Data:
+  nginx_Data:
+  mariadb_Data:
+    driver: local

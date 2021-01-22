@@ -1,0 +1,75 @@
+---
+version: "3"
+services:
+  kamailio:
+    image: my-kamailio:5.3.8-011621
+    restart: unless-stopped
+    container_name: kamailio
+    #entrypoint: [tail, -f, /dev/null]
+    #environment:
+    volumes:
+      - ./volumes/kamailio_Data:/etc/kamailio
+      - ./volumes/cert_Conf:/etc/dsiprouter/certs
+    ports:
+      - 5060:5060
+      - 5061:5061
+    depends_on:
+      - mariadb
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  mariadb:
+    image: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - ./volumes/mariadb_Data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    #entrypoint: [tail, -f, /dev/null]
+    #enviroment:
+    volumes:
+      - ./volumes/nginx_Data:/etc/nginx/sites-available
+      - ./volumes/cert_Conf:/etc/letsencrypt
+      - ./volumes/nginx_Conf:/etc/nginx
+    ports:
+      - 80:80
+      - 443:443
+      - 5000:5000
+    command: "mkdir /var/run/dsiprouter"
+    command: "curl -L https://raw.githubusercontent.com/wmnnd/nginx-certbot/master/init-letsencrypt.sh > init-letsencrypt.sh"
+    command: "chmod +x init-letsencrypt.sh && ./init-letsencrypt.sh"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./volumes/cert_Conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  kamailio_Data:
+  nginx_Data:
+  mariadb_Data:
+  cert_Conf:
+  nginx_Conf:
+    driver: local
