@@ -2,7 +2,8 @@
 version: "3"
 services:
   kamailio:
-    image: my-kamailio:5.3.8-011621
+    #image: my-kamailio:5.3.8-011621
+    image: kamailio/kamailio:5.3.8-stretch
     restart: unless-stopped
     container_name: kamailio
     #entrypoint: [tail, -f, /dev/null]
@@ -10,6 +11,7 @@ services:
     volumes:
       - ./volumes/kamailio_Data:/etc/kamailio
       - ./volumes/cert_Conf:/etc/dsiprouter/certs
+      - ./volumes/kamailio_Modules:/usr/lib/x86_64-linux-gnu/kamailio/modules
     ports:
       - 5060:5060
       - 5061:5061
