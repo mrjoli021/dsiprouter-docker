@@ -45,6 +45,8 @@ services:
       - ./volumes/nginx_Data:/etc/nginx/sites-available
       - ./volumes/cert_Conf:/etc/letsencrypt
       - ./volumes/nginx_Conf:/etc/nginx
+      - ./volumes/nginx_Opt:/opt/dsiprouter
+      - ./volumes/kamailio_Data:/etc/kamailio
     ports:
       - 80:80
       - 443:443
